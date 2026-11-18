@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Xダイジェスト｜株 × Claude Code</title>
+<meta name="description" content="Xから株とClaude Codeの有力な情報を集めて、見やすくまとめるアプリ">
+<meta name="theme-color" content="#0f1419">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Xダイジェスト">
+<meta name="referrer" content="no-referrer">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{
+  --bg:#f4f6f8; --panel:#ffffff; --ink:#0f1419; --sub:#536471; --line:#e3e8ec; --chip:#eef2f5;
+  --accent:#1d72d8; --accent-ink:#ffffff; --new:#e0245e; --warn-bg:#fff6e0; --warn-ink:#7a5200;
+  --badge-off:#1d72d8; --badge-news:#0b7a53; --badge-inv:#8a4fd1; --badge-rel:#c2410c;
+  --shadow:0 1px 2px rgba(0,0,0,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0b0f14; --panel:#151b22; --ink:#e7e9ea; --sub:#8b98a5; --line:#26303a; --chip:#1e2731;
+    --accent:#4c9bf0; --accent-ink:#0b0f14; --new:#ff5c8a; --warn-bg:#3a2e10; --warn-ink:#ffd78a;
+    --badge-off:#4c9bf0; --badge-news:#3cc48f; --badge-inv:#b48af0; --badge-rel:#f08a4c;
+    --shadow:none;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Segoe UI","Yu Gothic UI","Meiryo",sans-serif;-webkit-text-size-adjust:100%}
+a{color:var(--accent);text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:720px;margin:0 auto;padding:0 12px}
+
+/* header */
+header{position:sticky;top:0;z-index:10;background:var(--bg);background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
+.top{display:flex;align-items:center;gap:8px;padding:8px 0 4px}
+.top h1{font-size:17px;margin:0;font-weight:800;letter-spacing:.02em;white-space:nowrap}
+.top h1 span{color:var(--sub);font-weight:600;font-size:12px;margin-left:6px}
+#status{flex:1;min-width:0;font-size:12px;color:var(--sub);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ibtn{border:1px solid var(--line);background:var(--panel);border-radius:999px;width:34px;height:34px;display:inline-grid;place-items:center;font-size:16px;flex:none}
+.ibtn.spin span{display:inline-block;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tabs{display:flex;gap:6px;padding:4px 0}
+.tab{flex:1;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:7px 6px;font-weight:700;font-size:15px;position:relative}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tab .cnt{position:absolute;top:-6px;right:-4px;background:var(--new);color:#fff;font-size:11px;line-height:18px;min-width:18px;padding:0 5px;border-radius:9px;font-weight:700}
+.controls{display:flex;gap:6px;align-items:center;padding:4px 0 8px;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--panel);flex:none}
+.seg button{border:0;background:transparent;padding:4px 10px;font-size:13px;color:var(--sub)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:700}
+#q{flex:1;min-width:110px;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 12px;font-size:14px;color:var(--ink)}
+
+main{padding:10px 0 40px}
+.banner{background:var(--warn-bg);color:var(--warn-ink);border-radius:10px;padding:8px 12px;font-size:13px;margin:0 0 10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:12px 14px;margin:0 0 12px}
+h2{font-size:16px;margin:18px 2px 8px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+h2 small{font-size:12px;color:var(--sub);font-weight:400}
+h2 .n{font-size:12px;color:var(--sub);font-weight:600}
+
+/* AI */
+.ai h3{margin:0 0 6px;font-size:14px;color:var(--sub);display:flex;align-items:center;gap:6px}
+.ai .hl{font-size:17px;font-weight:800;margin:2px 0 8px;line-height:1.45}
+.ai ol{margin:0;padding-left:1.3em}
+.ai li{margin:0 0 8px}
+.ai li b{display:block}
+.ai .refs{display:inline-flex;gap:4px;flex-wrap:wrap;margin-left:4px;vertical-align:1px}
+.ai .refs button{border:1px solid var(--line);background:var(--chip);border-radius:6px;font-size:11px;padding:0 6px;line-height:18px;color:var(--sub)}
+.ai .caution{background:var(--warn-bg);color:var(--warn-ink);border-radius:8px;padding:6px 10px;font-size:13px;margin-top:6px}
+.ai .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:var(--sub);flex-wrap:wrap}
+.btn{border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:6px 14px;font-weight:700;font-size:14px}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:default}
+.muted{color:var(--sub);font-size:13px}
+
+/* terms */
+.terms{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 4px}
+.term{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:3px 10px;font-size:13px}
+.term i{font-style:normal;color:var(--sub);font-size:11px;margin-left:4px}
+.term[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.term[aria-pressed="true"] i{color:inherit}
+.filterbar{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sub);margin:6px 2px}
+
+/* posts */
+.post{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:11px 13px 9px;margin:0 0 10px;scroll-margin-top:150px}
+.post.flash{outline:2px solid var(--accent);outline-offset:1px}
+.ph{display:flex;gap:9px;align-items:center}
+.av{width:38px;height:38px;border-radius:50%;flex:none;background:var(--chip);object-fit:cover}
+.who{flex:1;min-width:0;line-height:1.3}
+.who b{font-size:14px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who span{font-size:12px;color:var(--sub)}
+.badge{font-style:normal;font-size:11px;font-weight:700;border-radius:5px;padding:0 5px;margin-left:4px;color:#fff;background:var(--badge-off);vertical-align:1px;white-space:nowrap}
+.badge.news{background:var(--badge-news)}.badge.inv{background:var(--badge-inv)}.badge.rel{background:var(--badge-rel)}
+.badge.lang{background:transparent;color:var(--sub);border:1px solid var(--line);font-weight:600}
+.newb{font-style:normal;font-size:11px;font-weight:800;color:var(--new);margin-left:4px}
+time{font-size:12px;color:var(--sub);flex:none;align-self:flex-start}
+.tx{margin:7px 0 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere}
+.tx.clamp{display:-webkit-box;-webkit-line-clamp:7;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer}
+.trline{font-size:12px;color:var(--sub);margin-top:3px}
+.trline button{border:0;background:none;color:var(--accent);padding:0;font-size:12px}
+.cn{background:var(--warn-bg);color:var(--warn-ink);border-radius:8px;padding:6px 10px;font-size:13px;margin-top:7px;white-space:pre-wrap}
+.qt{border:1px solid var(--line);border-radius:10px;padding:6px 10px;margin:8px 0 0;font-size:13px;color:var(--sub);white-space:pre-wrap;word-break:break-word;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.qt b{color:var(--ink)}
+.media{display:grid;gap:3px;margin-top:8px;border-radius:12px;overflow:hidden;grid-template-columns:repeat(var(--n,1),1fr)}
+.media a{position:relative;display:block;background:var(--chip)}
+.media img{width:100%;height:100%;max-height:300px;object-fit:cover;display:block;aspect-ratio:16/10}
+.media[style*="--n:1"] img{aspect-ratio:auto;max-height:320px}
+.media .play{position:absolute;inset:0;display:grid;place-items:center;font-size:34px;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+.pf{display:flex;gap:12px;align-items:center;margin-top:8px;font-size:12px;color:var(--sub);flex-wrap:wrap}
+.pf .sp{flex:1}
+.pf a{font-weight:700}
+.pf .mute{border:0;background:none;color:var(--sub);font-size:12px;padding:0}
+
+/* compact list */
+.list{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;margin:0 0 10px}
+.row{display:flex;gap:9px;padding:9px 12px;border-top:1px solid var(--line);color:inherit}
+.row:first-child{border-top:0}
+.row .av{width:28px;height:28px}
+.row .meta{font-size:12px;color:var(--sub)}
+.row .meta b{color:var(--ink)}
+.row .t{font-size:14px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+.more{display:block;width:100%;border:1px dashed var(--line);background:transparent;border-radius:12px;padding:8px;color:var(--accent);font-weight:700;margin:0 0 10px}
+.empty{color:var(--sub);font-size:13px;padding:14px;text-align:center;background:var(--panel);border:1px dashed var(--line);border-radius:14px;margin:0 0 10px}
+.regions{display:inline-flex;margin-left:auto}
+.skel{height:92px;border-radius:14px;background:linear-gradient(90deg,var(--panel),var(--chip),var(--panel));background-size:200% 100%;animation:sh 1.2s infinite;margin:0 0 10px;border:1px solid var(--line)}
+@keyframes sh{to{background-position:-200% 0}}
+footer.note{font-size:12px;color:var(--sub);margin:22px 2px 0;line-height:1.7}
+
+/* settings */
+dialog{border:1px solid var(--line);border-radius:16px;background:var(--panel);color:var(--ink);width:min(560px,94vw);max-height:88vh;padding:0}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+.dlg{padding:16px 18px}
+.dlg h2{margin:0 0 10px}
+.dlg label{display:block;font-weight:700;font-size:14px;margin:14px 0 4px}
+.dlg input,.dlg select,.dlg textarea{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:8px 10px;font:inherit;font-size:14px}
+.dlg textarea{min-height:70px}
+.dlg .hint{font-size:12px;color:var(--sub);margin-top:4px;line-height:1.6}
+.dlg .acts{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+#installTip{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:20;background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 38px 10px 12px;font-size:13px;display:none;max-width:700px;margin:0 auto}
+#installTip button{position:absolute;right:6px;top:6px;border:0;background:none;color:inherit;font-size:18px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <h1>Xダイジェスト<span>株 × Claude Code</span></h1>
+      <div id="status" aria-live="polite"></div>
+      <button class="ibtn" id="refresh" aria-label="更新"><span>↻</span></button>
+      <button class="ibtn" id="settingsBtn" aria-label="設定">⚙</button>
+    </div>
+    <nav class="tabs" id="tabs" role="tablist"></nav>
+    <div class="controls">
+      <div class="seg" id="winSeg" role="group" aria-label="期間">
+        <button data-w="6">6時間</button><button data-w="24">24時間</button><button data-w="72">3日</button>
+      </div>
+      <div class="seg" id="sortSeg" role="group" aria-label="並び順">
+        <button data-s="hot">注目順</button><button data-s="new">新着順</button>
+      </div>
+      <input id="q" type="search" placeholder="絞り込み（例：決算、hooks）" autocomplete="off">
+    </div>
+  </div>
+</header>
+<main class="wrap" id="main"></main>
+
+<dialog id="settings">
+  <form class="dlg" method="dialog" id="setForm">
+    <h2>設定</h2>
+    <label for="sKey">Claude APIキー（AI要約を使うときだけ）</label>
+    <input id="sKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-...">
+    <div class="hint">キーはこの端末のブラウザの中にだけ保存し、要約するときに Anthropic にだけ送ります。キーは <a href="https://platform.claude.com/settings/keys" target="_blank" rel="noopener">Claude Console</a> で作れます（APIは従量課金です）。</div>
+    <label for="sModel">要約に使うモデル</label>
+    <select id="sModel"></select>
+    <div class="hint" id="sModelHint"></div>
+    <label for="sWords">ミュートする言葉（1行に1つ）</label>
+    <textarea id="sWords" placeholder="例：仮想通貨"></textarea>
+    <label for="sAuthors">ミュートするアカウント（@なし・1行に1つ）</label>
+    <textarea id="sAuthors" placeholder="例：example_user"></textarea>
+    <div class="hint">各投稿の「非表示」を押しても追加されます。</div>
+    <div class="acts">
+      <button type="button" class="btn ghost" id="sClear">保存データを消す</button>
+      <button type="button" class="btn ghost" id="sCancel">閉じる</button>
+      <button type="submit" class="btn" id="sSave">保存</button>
+    </div>
+    <div class="hint" style="margin-top:14px">データは <a href="https://github.com/FxEmbed/FxEmbed" target="_blank" rel="noopener">FxTwitter</a> の公開API（非公式）を通して、Xの公開投稿をこの端末から直接取得しています。X側の仕様変更で取れなくなることがあります。</div>
+  </form>
+</dialog>
+<div id="installTip" role="note"><button id="installX" aria-label="閉じる">×</button>📱 <b>アプリとして使う：</b>下の共有ボタン（□に↑）→「ホーム画面に追加」で、アイコンから全画面で開けます。</div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
